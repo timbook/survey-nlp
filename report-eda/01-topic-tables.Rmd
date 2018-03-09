@@ -1,0 +1,23 @@
+---
+title: "Topic Tables"
+output: html_document
+---
+
+### Data being read in.
+```{r}
+library(tidyverse)
+tm <- read.csv("../output/complaint-topics.csv")
+colnames(tm) <- gsub('\\.', '_', tolower(colnames(tm)))
+```
+
+### Tabulate products.
+```{r}
+table(tm$product)
+```
+
+### Tabulate product by topics.
+```{r}
+table(tm$product, tm$topic)
+table(tm$product, tm$topic) %>% prop.table(1) %>% round(4)
+table(tm$product, tm$topic) %>% prop.table(2) %>% round(4)
+```
