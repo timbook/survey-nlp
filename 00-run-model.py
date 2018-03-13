@@ -14,10 +14,13 @@ compl = compl[null_mask]
 corpus = compl['Consumer complaint narrative'].tolist()
 
 # Normalize text
-# TODO: Named Entity recognizer.
 sw = set(nltk.corpus.stopwords.words('english'))
+sw = [re.sub('\'', '', s) for s in sw]
 porter = nltk.PorterStemmer()
 def filterComps(s):
+    s = s.replace('credit card', 'credit_card')
+    s = s.replace('student loan', 'student_loan')
+    s = s.replace('do n\'t', 'dont')
     s = re.sub('[' + string.punctuation + ']', '', s).lower()
     s = re.sub('[x]+', '', s)
     s = nltk.tokenize.word_tokenize(s)
