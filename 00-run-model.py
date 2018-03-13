@@ -1,14 +1,15 @@
-import sys
+import sys, re, string
+import nltk
 import numpy as np
 import pandas as pd
-import nltk
-import re
 from gensim import corpora, models
-import string
 
-n_top = int(sys.argv[1]) if len(sys.argv) > 1 else 10
+if len(sys.argv) == 1:
+    n_top = 10
+else:
+    n_top = [int(i) for i in sys.argv[1:]]
 
-compl = pd.read_csv('complaint-topics.csv', encoding='utf-8')
+compl = pd.read_csv('../data/Consumer_Complaints.csv', encoding='utf-8')
 null_mask = pd.notnull(compl['Consumer complaint narrative'])
 compl = compl[null_mask]
 corpus = compl['Consumer complaint narrative'].tolist()
@@ -35,23 +36,30 @@ print("Beginning doc2bow...")
 dictionary = corpora.Dictionary(corp_filt)
 doc_list = [dictionary.doc2bow(c) for c in corp_filt]
 
-# LDA Topic Model
-print("Beginning LDA...")
-ldamodel = models.ldamodel.LdaModel(doc_list, num_topics=n_top, id2word=dictionary, passes=5)
-ldamodel.show_topics()
+for n in n_top:
+    # LDA Topic Model
+    print("Beginning LDA...")
+    ldamodel = models.ldamodel.LdaModel(doc_list,
+                                        num_topics=n,
+                                        id2word=dictionary,
+                                        passes=5)
+    ldamodel.save('models/lda%02d' % n)
 
-# Get optimal topic predictions
-def getMax(top):
-    cats = [a for (a, b) in top]
-    probs = [b for (a, b) in top]
-    M = np.argmax(probs)
-    return(cats[M])
+    # Get optimal topic predictions
+    def getMax(top):
+        cats = [a for (a, b) in top]
+        probs = [b for (a, b) in top]
+        M = np.argmax(probs)
+        return(cats[M])
 
-print("Optimizing topic...")
-topics = ldamodel.get_document_topics(doc_list)
-opt_topics = list(map(getMax, topics))
-# TODO: Output all topic probabilities.
+    print("Optimizing topic...")
+    topics = ldamodel.get_document_topics(doc_list)
+    opt_topics = list(map(getMax, topics))
 
-print("Writing...")
-compl['topic%02d' % n_top] = opt_topics
-compl.to_csv("complaint-topics.csv", index=False, encoding='utf-8')
+    print("Writing...")
+    compl['topic%02d' % n] = opt_topics
+
+compl.to_csv("output/complaint-topics.csv", index=False, encoding='utf-8')
+
+
+
