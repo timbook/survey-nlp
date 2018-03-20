@@ -43,6 +43,8 @@ for n in n_top:
                                         num_topics=n,
                                         id2word=dictionary,
                                         passes=5)
+
+    print("Saving model...")
     ldamodel.save('models/lda%02d' % n)
 
     # Get optimal topic predictions
@@ -56,9 +58,9 @@ for n in n_top:
     topics = ldamodel.get_document_topics(doc_list)
     opt_topics = list(map(getMax, topics))
 
-    print("Writing...")
     compl['topic%02d' % n] = opt_topics
 
+print("Writing...")
 compl.to_csv("output/complaint-topics.csv", index=False, encoding='utf-8')
 
 
