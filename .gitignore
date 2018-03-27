@@ -1,8 +1,10 @@
-output
 *.csv
 *.log
 *.html
 *.swp
 *.xlsx
+output
 models
+random-sents
+__pycache__
 

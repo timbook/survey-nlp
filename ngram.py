@@ -6,6 +6,7 @@ class NGramModel:
         self.sents = sents
         self.n_gram = n_gram
         self.start_tokens = ['START' + str(i) for i in range(n_gram - 1)]
+        self.grams = None
         self.corpus = None
         self.pdf = None
 
@@ -29,7 +30,7 @@ class NGramModel:
 
         def filterOneSent(s, stokens):
             s = nltk.tokenize.word_tokenize(s)
-            if s[-1] in ['.', '?', '!']: s = s[:-1]
+            if len(s) > 0 and s[-1] in ['.', '?', '!']: s = s[:-1]
             return stokens + s + ['END']
 
         for sent in self.sents:
@@ -38,17 +39,15 @@ class NGramModel:
             for (reg, repl) in replacements:
                 sent = re.sub(reg, repl, sent)
 
-            sent = nltk.tokenize.sent_tokenize(sent)
+            corpus_out += filterOneSent(sent, self.start_tokens)
 
-            corpus_out += list(map(lambda s: filterOneSent(s, self.start_tokens), sent))
-
-        self.corpus = [w for sent in corpus_out for w in sent]
+        self.corpus = corpus_out
         if print_out:
             print("Corpus ready!")
 
-    def makeNGrams(self, k = 0.2, print_out = True):
-        grams = nltk.ngrams(self.corpus, self.n_gram)
-        gfreq = nltk.FreqDist(grams)
+    def makeNGrams(self, k = 0, print_out = True):
+        self.grams = nltk.ngrams(self.corpus, self.n_gram)
+        gfreq = nltk.FreqDist(self.grams)
         self.pdf = nltk.LidstoneProbDist(gfreq, k)
         print("N-grams ready!")
 
@@ -95,7 +94,31 @@ class NGramModel:
         return(sent_out)
 
     def perplexity(self, sent):
+
+        def gramMatch(this_gram, all_gram, N):
+            ok_gram = [this_gram[i] == all_gram[i] for i in range(N - 1)]
+            return all(ok_gram)
+
+        if type(sent) is str:
+            sent = tuple(nltk.tokenize.word_tokenize(sent))
+
         if (type(sent) is list) or (type(sent) is tuple):
-            pass
-        elif type(sent) is str:
-            pass
+            sent_grams = list(nltk.ngrams(sent, 3))
+            probs = []
+
+            for this_gr in sent_grams:
+                ok_grams = [g for g in self.grams if gramMatch(this_gr, g, self.n_gram)]
+                sum_prob = sum(list(map(self.pdf.prob, ok_grams)))
+                num_prob = self.pdf.prob(tuple(this_gr))
+                probs.append(num_prob / sum_prob)
+
+            N = len(probs)
+            log_pp = - 1 / N * np.sum(np.log(probs))
+            return np.exp(log_pp)
+
+
+
+
+
+
+
