@@ -94,27 +94,24 @@ class NGramModel:
         return(sent_out)
 
     def perplexity(self, sent):
+        sent = nltk.tokenize.word_tokenize(sent.lower())
+        sent = self.start_tokens + sent + ['END']
+        sent_grams = nltk.ngrams(sent, self.n_gram)
 
-        def gramMatch(this_gram, all_gram, N):
-            ok_gram = [this_gram[i] == all_gram[i] for i in range(N - 1)]
-            return all(ok_gram)
+        def okGram(gr, sent_gram, N):
+            ok = [gr[n] == sent_gram[n] for n in range(N - 1)]
+            return(all(ok))
 
-        if type(sent) is str:
-            sent = tuple(nltk.tokenize.word_tokenize(sent))
+        gram_probs = []
+        for sg in sent_grams:
+            ok_grams = [gr for (gr, n) in self.pdf.freqdist().items() if okGram(gr, sg, self.n_gram)]
+            probs = [self.pdf.prob(gr) for gr in ok_grams]
+            gram_prob = self.pdf.prob(sg) / sum(probs)
+            gram_probs.append(gram_prob)
 
-        if (type(sent) is list) or (type(sent) is tuple):
-            sent_grams = list(nltk.ngrams(sent, 3))
-            probs = []
+        log_pp = -1 / len(gram_probs) * np.sum(np.log(gram_probs))
+        return np.exp(log_pp)
 
-            for this_gr in sent_grams:
-                ok_grams = [g for g in self.grams if gramMatch(this_gr, g, self.n_gram)]
-                sum_prob = sum(list(map(self.pdf.prob, ok_grams)))
-                num_prob = self.pdf.prob(tuple(this_gr))
-                probs.append(num_prob / sum_prob)
-
-            N = len(probs)
-            log_pp = - 1 / N * np.sum(np.log(probs))
-            return np.exp(log_pp)
 
 
 
