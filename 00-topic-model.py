@@ -19,11 +19,12 @@ sw = set(nltk.corpus.stopwords.words('english'))
 sw = [re.sub('\'', '', s) for s in sw]
 porter = nltk.PorterStemmer()
 def filterComps(s):
+    s = s.lower()
     s = s.replace('credit card', 'credit_card')
     s = s.replace('student loan', 'student_loan')
-    s = s.replace('do n\'t', 'dont')
-    s = re.sub('[' + string.punctuation + ']', '', s).lower()
-    s = re.sub('[x]+', '', s)
+    s = s.replace('do.n\'t', 'dont')
+    s = re.sub('[' + string.punctuation + ']', '', s)
+    s = re.sub('[x]{2,}', '', s)
     s = nltk.tokenize.word_tokenize(s)
     s = [porter.stem(w) for w in s if (w not in sw and w.isalpha())]
     return(s)
