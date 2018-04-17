@@ -106,8 +106,12 @@ class NGramModel:
         for sg in sent_grams:
             ok_grams = [gr for (gr, n) in self.pdf.freqdist().items() if okGram(gr, sg, self.n_gram)]
             probs = [self.pdf.prob(gr) for gr in ok_grams]
-            gram_prob = self.pdf.prob(sg) / sum(probs)
-            gram_probs.append(gram_prob)
+            try:
+                gram_prob = self.pdf.prob(sg) / sum(probs)
+            except ZeroDivisionError:
+                return None
+            else:
+                gram_probs.append(gram_prob)
 
         log_pp = -1 / len(gram_probs) * np.sum(np.log(gram_probs))
         return np.exp(log_pp)

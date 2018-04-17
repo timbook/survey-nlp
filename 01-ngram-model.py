@@ -10,6 +10,11 @@ k_vec = [int(i) for i in sys.argv[1:]]
 comps_df = pd.read_csv('output/complaint-topics.csv')
 comps = comps_df['Consumer complaint narrative']
 
+ex_sents = open('output/example_sents.txt').read().split('\n')
+ex_sents = [s for s in ex_sents if s != '']
+
+pp_df = pd.DataFrame({'sentence': ex_sents})
+
 for k in k_vec:
     print("Entering loop %d" % k)
     comps_k = list(comps[comps_df.topic11 == k])
@@ -27,18 +32,19 @@ for k in k_vec:
 
     # Filter complaints into a format efficiently used in trigram.
     mod.filterSents([
-        ('(19|20)[0-9]{2}', 'YEAR'),
+        ('(19|20)[0-9]{2}', '_year_'),
         ('[^A-Za-z0-9 .!?]', ''),
-        ('[Xx]{2,}', 'PROPER_NOUN'),
+        ('[Xx]{2,}', '_proper_noun_'),
         ('[\.]{3,}', '___')
     ])
 
-    # Initiate N-grams with k = 0.05 (for now)
+    # Initiate N-grams with k = 0.05
     mod.makeNGrams(0.05)
 
-    # Write random sentences to a text file.
-    fname = 'random-sents/t%02d-sents.txt' % k
-    with open(fname, 'w') as f:
-        for i in range(10):
-            print('Printing sentence number %d' % i)
-            f.write(mod.genSent() + '\n')
+    p_scores = []
+    for s in ex_sents:
+        p_scores.append(mod.perplexity(s))
+
+    pp_df['topic_%d' % k] = p_scores
+
+pp_df.to_csv('output/perlexity-table.csv', index=False)
