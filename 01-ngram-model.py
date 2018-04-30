@@ -5,7 +5,8 @@ import numpy as np
 
 import ngram
 
-k_vec = [int(i) for i in sys.argv[1:]]
+# k_vec = [int(i) for i in sys.argv[1:]]
+k_vec = range(int(sys.argv[1]))
 
 comps_df = pd.read_csv('output/complaint-topics.csv')
 comps = comps_df['Consumer complaint narrative']

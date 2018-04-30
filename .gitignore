@@ -1,4 +1,5 @@
 *.csv
+!output/example_sents.txt
 *.log
 *.html
 *.swp
