@@ -1,10 +1,10 @@
 *.csv
-!output/example_sents.txt
 *.log
 *.html
 *.swp
 *.xlsx
 output/*
+!output/example_sents.txt
 models
 random-sents
 __pycache__
