@@ -4,7 +4,7 @@
 *.html
 *.swp
 *.xlsx
-output
+output/*
 models
 random-sents
 __pycache__
