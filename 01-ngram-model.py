@@ -5,7 +5,7 @@ import numpy as np
 
 import ngram
 
-# k_vec = [int(i) for i in sys.argv[1:]]
+#k_vec = [int(i) for i in sys.argv[1:]]
 k_vec = range(int(sys.argv[1]))
 
 comps_df = pd.read_csv('output/complaint-topics.csv')
@@ -48,4 +48,4 @@ for k in k_vec:
 
     pp_df['topic_%d' % k] = p_scores
 
-pp_df.to_csv('output/perlexity-table.csv', index=False)
+pp_df.to_csv('output/perplexity-table.csv', index=False)

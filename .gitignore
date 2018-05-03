@@ -3,8 +3,8 @@
 *.html
 *.swp
 *.xlsx
-output/*
-!output/example_sents.txt
+output/complaint-topics.csv
+!output/perplexity-table.csv
 models
 random-sents
 __pycache__
